@@ -1,32 +1,105 @@
+/* Container principal do calendário */
 .calendar-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .calendar-header {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    max-width: 600px;
-  }
-  
-  .calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 10px;
-    margin-top: 20px;
-  }
-  
-  .calendar-day, .calendar-day-name {
-    width: 100%;
-    padding: 10px;
-    text-align: center;
-    border: 1px solid #ccc;
-  }
-  
-  .calendar-day:hover {
-    background-color: #f0f0f0;
-    cursor: pointer;
-  }
-  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Arial', sans-serif;
+  color: #333;
+  width: 100%;
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  background-color: #fff;
+}
+
+/* Cabeçalho do calendário */
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.calendar-header h2 {
+  font-size: 1.5em;
+  color: #333;
+}
+
+.calendar-header button {
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.calendar-header button:hover {
+  background-color: #0056b3;
+}
+
+/* Grid de dias do calendário */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  width: 100%;
+}
+
+.calendar-day-name {
+  padding: 10px;
+  text-align: center;
+  background-color: #f5f5f5;
+  font-weight: bold;
+  border-radius: 5px;
+  color: #555;
+}
+
+.calendar-day {
+  padding: 15px;
+  text-align: center;
+  background-color: #fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 5px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+/* Sombreamento ao passar o mouse nos dias */
+.calendar-day:hover {
+  background-color: #007BFF;
+  color: white;
+  transform: scale(1.05);
+}
+
+/* Dia preenchido com ícone de 'check' */
+.day-status.filled {
+  color: green;
+  font-size: 1.2em;
+  margin-left: 10px;
+}
+
+/* Dia não preenchido com ícone de 'X' */
+.day-status.unfilled {
+  color: red;
+  font-size: 1.2em;
+  margin-left: 10px;
+}
+
+/* Dia vazio (espaços antes do início do mês) */
+.empty {
+  background-color: transparent;
+  border: none;
+  pointer-events: none;
+}
+
+/* Somente para exibir os status de dias */
+.day-status {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
