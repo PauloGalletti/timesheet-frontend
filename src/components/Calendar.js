@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
-import './Calendar.css'; // Importar o CSS do calendário
+import './Calendar.css';
 
-const Calendar = ({ onDayClick }) => {
+const Calendar = ({ onDayClick, filledDays }) => { 
   const [currentMonth, setCurrentMonth] = useState(dayjs());
 
   const nextMonth = () => {
@@ -20,6 +20,7 @@ const Calendar = ({ onDayClick }) => {
   const generateDays = () => {
     const daysInMonth = currentMonth.daysInMonth();
     const firstDayOfMonth = currentMonth.startOf("month").day();
+    const today = dayjs().format("YYYY-MM-DD");
     const daysArray = [];
 
     // Dias vazios antes do primeiro dia do mês
@@ -29,12 +30,16 @@ const Calendar = ({ onDayClick }) => {
 
     // Dias do mês
     for (let day = 1; day <= daysInMonth; day++) {
-      // Gerar a data completa com o formato 'YYYY-MM-DD'
       const fullDate = currentMonth.date(day).format('YYYY-MM-DD');
-      
+
+      let dayStatus = '';
+      if (fullDate < today) {
+        dayStatus = filledDays[fullDate] ? '✔️' : '❌';
+      }
+
       daysArray.push(
         <div key={day} className="calendar-day" onClick={() => onDayClick(fullDate)}>
-          {day}
+          {day} {dayStatus && <span className={`day-status ${filledDays[fullDate] ? 'filled' : 'unfilled'}`}>{dayStatus}</span>}
         </div>
       );
     }
