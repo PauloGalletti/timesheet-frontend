@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import api from "../services/api";
 import authService from "../services/authService";
 import { useNavigate } from "react-router-dom";
+import './Admin.css';
 
 const Admin = () => {
   const [clients, setClients] = useState([]);
@@ -12,9 +13,10 @@ const Admin = () => {
   const [selectedClient, setSelectedClient] = useState(null);
   const navigate = useNavigate();
 
-  // Carrega a lista de clientes ao montar o componente
+  // Carrega a lista de clientes e projetos ao montar o componente
   useEffect(() => {
     fetchClients();
+    fetchProjects();
   }, []);
 
   const fetchClients = () => {
@@ -23,6 +25,13 @@ const Admin = () => {
       .catch(error => console.error("Erro ao carregar clientes:", error));
   };
 
+  const fetchProjects = () => {
+    api.get("/projects/")
+      .then(response => setProjects(response.data))
+      .catch(error => console.error("Erro ao carregar projetos:", error));
+  };
+
+  // Cria um novo cliente
   const handleCreateClient = () => {
     if (!clientName) {
       alert("Por favor, insira o nome do cliente.");
@@ -37,6 +46,7 @@ const Admin = () => {
       .catch(error => console.error("Erro ao criar cliente:", error));
   };
 
+  // Cria um novo projeto
   const handleCreateProject = () => {
     if (!selectedClient || !projectName) {
       alert("Por favor, selecione um cliente e insira o nome do projeto.");
@@ -103,12 +113,6 @@ const Admin = () => {
           onChange={(e) => setProjectName(e.target.value)}
           className="input"
         />
-        <textarea
-          placeholder="Descrição do Projeto"
-          value={projectDescription}
-          onChange={(e) => setProjectDescription(e.target.value)}
-          className="input"
-        ></textarea>
         <button onClick={handleCreateProject} className="btn btn-success">Criar Projeto</button>
       </section>
 
@@ -116,7 +120,16 @@ const Admin = () => {
         <h2>Clientes Existentes</h2>
         <ul>
           {clients.map(client => (
-            <li key={client.id}>{client.name}</li>
+            <li key={client.id}>
+              <strong>{client.name}</strong>
+              <ul>
+                {projects
+                  .filter(project => project.client === client.id)
+                  .map(project => (
+                    <li key={project.id}>{project.name}</li>
+                  ))}
+              </ul>
+            </li>
           ))}
         </ul>
       </section>
