@@ -138,6 +138,7 @@ const Dashboard = () => {
       {/* Gerenciamento de Contas - Aparece apenas para Admin */}
       {authService.isAdmin() && (
         <section className="user-management">
+          <button onClick={() => navigate('/admin')} className="btn btn-primary">Acessar Administração</button>
           <h2>Gerenciar Usuários</h2>
           <ul className="user-list">
             {users.map(user => (

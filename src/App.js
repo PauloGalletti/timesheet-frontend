@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-d
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import authService from "./services/authService"; // Importa o authService para verificar autenticação
+import Admin from './pages/Admin'; // Importa o novo componente Admin
 
 // Rota protegida, acessível apenas se o usuário estiver autenticado
 const PrivateRoute = ({ element }) => {
@@ -18,6 +19,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         {/* Rota protegida para o dashboard */}
         <Route path="/dashboard" element={<PrivateRoute element={<Dashboard />} />} />
+        <Route path="/admin" element={<PrivateRoute element={<Admin />} />} />
       </Routes>
     </Router>
   );
