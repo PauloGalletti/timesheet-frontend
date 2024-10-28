@@ -8,33 +8,46 @@ import './Dashboard.css';
 
 const Dashboard = () => {
   const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null); // Armazena o usuário selecionado para análise
+  const [clients, setClients] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [selectedDay, setSelectedDay] = useState(null);
+  const [client, setClient] = useState(null);
+  const [project, setProject] = useState(null);
+  const [atendimento, setAtendimento] = useState("Sustentação");
+  const [detalhes, setDetalhes] = useState("");
+  const [obs, setObs] = useState("");
   const [entrada, setEntrada] = useState("");
   const [intervalo, setIntervalo] = useState("");
   const [saida, setSaida] = useState("");
   const [filledDays, setFilledDays] = useState({});
   const navigate = useNavigate();
 
-  // Carrega a lista de usuários se for admin
+  // Carrega a lista de usuários, clientes e projetos
   useEffect(() => {
     if (authService.isAdmin()) {
       api.get("/users/")
         .then(response => setUsers(response.data))
         .catch(error => console.error("Erro ao carregar usuários:", error));
     }
+    api.get("/clients/")
+      .then(response => setClients(response.data))
+      .catch(error => console.error("Erro ao carregar clientes:", error));
+
+    api.get("/projects/")
+      .then(response => setProjects(response.data))
+      .catch(error => console.error("Erro ao carregar projetos:", error));
+
     fetchFilledDays(); // Carrega os dias preenchidos para o usuário logado ou o selecionado
   }, []);
 
   // Carrega os dias preenchidos para um usuário específico (ou o logado)
   const fetchFilledDays = (userId = null) => {
-    const id = userId || parseInt(authService.getUserId(), 10); // Pega o ID correto (logado ou selecionado)
-    
+    const id = userId || parseInt(authService.getUserId(), 10);
     api.get(`/timesheet/?user=${id}`)
       .then(response => {
         const days = {};
         response.data.forEach(entry => {
-          // Armazena os dados do timesheet apenas para o usuário selecionado ou logado
           if (entry.user === id) {
             days[entry.date] = entry;
           }
@@ -44,31 +57,28 @@ const Dashboard = () => {
       .catch(error => console.error("Erro ao carregar os dias preenchidos:", error));
   };
 
-  // Função para analisar as horas de outro usuário (somente admin)
-  const handleAnalyzeHours = (user) => {
-    setSelectedUser(user); // Seleciona o usuário
-    fetchFilledDays(user.id); // Carrega os dias preenchidos daquele usuário
-  };
-
-  // Função para retornar ao calendário do usuário logado
-  const handleReturnToMyCalendar = () => {
-    setSelectedUser(null); // Define como nulo para voltar ao próprio calendário
-    fetchFilledDays(); // Recarrega os dias do usuário logado
-  };
-
   // Função para carregar as horas do dia clicado no calendário
   const handleDayClick = (day) => {
     setSelectedDay(day);
-
     if (filledDays[day]) {
-      setEntrada(filledDays[day].entrada);
-      setIntervalo(filledDays[day].intervalo);
-      setSaida(filledDays[day].saida);
+      const entry = filledDays[day];
+      setEntrada(entry.entrada);
+      setIntervalo(entry.intervalo);
+      setSaida(entry.saida);
+      setClient(entry.client);
+      setProject(entry.project);
+      setAtendimento(entry.atendimento);
+      setDetalhes(entry.detalhes);
+      setObs(entry.obs);
     } else {
-      // Limpa os campos se o dia não estiver preenchido
       setEntrada("");
       setIntervalo("");
       setSaida("");
+      setClient(null);
+      setProject(null);
+      setAtendimento("Sustentação");
+      setDetalhes("");
+      setObs("");
     }
   };
 
@@ -83,29 +93,42 @@ const Dashboard = () => {
       return;
     }
 
+    if (!client) {
+      alert("Por favor, selecione um cliente.");
+      return;
+    }
+
+    if (!project) {
+      alert("Por favor, selecione um projeto.");
+      return;
+    }
+
     const timesheet = {
       date: formattedDate,
       user: userId,
+      client,
+      project,
+      atendimento,
+      detalhes,
+      obs,
       entrada,
       intervalo,
       saida,
     };
 
-    // Verifica se o intervalo tem pelo menos 1 hora
-    const [hours, minutes] = intervalo.split(":").map(Number);
-    if (hours * 60 + minutes < 60) {
-      alert("O intervalo deve ser no mínimo de 1 hora.");
-      return;
-    }
-
     api.post('/timesheet/', timesheet)
       .then(response => {
         console.log("Horários salvos com sucesso!");
         alert("Horários salvos com sucesso!");
-        fetchFilledDays(selectedUser ? selectedUser.id : null);  // Atualiza os dias preenchidos após salvar
+        fetchFilledDays(selectedUser ? selectedUser.id : null);
         setEntrada("");
         setIntervalo("");
         setSaida("");
+        setClient(null);
+        setProject(null);
+        setAtendimento("Sustentação");
+        setDetalhes("");
+        setObs("");
       })
       .catch(error => {
         console.error("Erro ao salvar os horários", error.response ? error.response.data : error.message);
@@ -113,56 +136,28 @@ const Dashboard = () => {
       });
   };
 
-  const handleLogout = () => {
-    authService.logout();
-    navigate("/login");
-  };
-
-  const deleteUser = (username) => {
-    api.delete(`/users/${username}/`)
-      .then(() => {
-        setUsers(users.filter(user => user.username !== username));
-      })
-      .catch(error => console.error("Erro ao deletar usuário:", error));
-  };
-
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
         <h1>Dashboard de Administração</h1>
-        <button onClick={handleLogout} className="btn btn-danger">
-          Logout
-        </button>
+        <button onClick={() => {
+          authService.logout();
+          navigate("/login");
+        }} className="btn btn-danger">Logout</button>
       </div>
 
-      {/* Gerenciamento de Contas - Aparece apenas para Admin */}
       {authService.isAdmin() && (
-        <section className="user-management">
+        <div className="admin-tools">
           <button onClick={() => navigate('/admin')} className="btn btn-primary">Acessar Administração</button>
           <h2>Gerenciar Usuários</h2>
           <ul className="user-list">
             {users.map(user => (
-              <li key={user.username} className="user-item">
+              <li key={user.id} className="user-item">
                 <span>{user.username}</span>
-                <button className="btn btn-primary" onClick={() => handleAnalyzeHours(user)}>Analisar Horas</button>
-                <button className="btn btn-danger" onClick={() => deleteUser(user.username)}>Excluir</button>
+                <button className="btn btn-secondary" onClick={() => setSelectedUser(user)}>Analisar Horas</button>
               </li>
             ))}
           </ul>
-        </section>
-      )}
-
-      {/* Botão para retornar ao próprio calendário (aparece apenas ao analisar outro usuário) */}
-      {selectedUser && (
-        <button onClick={handleReturnToMyCalendar} className="btn btn-secondary">
-          Voltar ao meu calendário
-        </button>
-      )}
-
-      {/* Exibe o nome do usuário cujas horas estão sendo analisadas */}
-      {selectedUser && (
-        <div className="user-hours">
-          <h3>Planilha de Horas: {selectedUser.username}</h3>
         </div>
       )}
 
@@ -173,6 +168,44 @@ const Dashboard = () => {
       {selectedDay && (
         <div className="time-form">
           <h3>Horários para o dia {selectedDay}</h3>
+          <label>
+            Cliente:
+            <select value={client || ""} onChange={(e) => {
+              const selectedClient = parseInt(e.target.value, 10);
+              setClient(selectedClient);
+              setProject(null); // Resetar o projeto ao mudar de cliente
+            }}>
+              <option value="">Selecione um cliente</option>
+              {clients.map(client => (
+                <option key={client.id} value={client.id}>{client.name}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Projeto:
+            <select value={project || ""} onChange={(e) => setProject(parseInt(e.target.value, 10))}>
+              <option value="">Selecione um projeto</option>
+              {projects.filter(proj => proj.client === client).map(proj => (
+                <option key={proj.id} value={proj.id}>{proj.name}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Atendimento:
+            <select value={atendimento} onChange={(e) => setAtendimento(e.target.value)}>
+              <option value="Sustentação">Sustentação</option>
+              <option value="Projetos">Projetos</option>
+              <option value="Atividades Internas">Atividades Internas</option>
+            </select>
+          </label>
+          <label>
+            Detalhes:
+            <textarea value={detalhes} onChange={(e) => setDetalhes(e.target.value)} />
+          </label>
+          <label>
+            Observações:
+            <textarea value={obs} onChange={(e) => setObs(e.target.value)} />
+          </label>
           <label>
             Horário de Entrada:
             <input type="time" value={entrada} onChange={(e) => setEntrada(e.target.value)} />
