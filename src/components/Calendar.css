@@ -74,6 +74,7 @@
   background-color: #007BFF;
   color: white;
   transform: scale(1.05);
+  cursor: pointer;
 }
 
 /* Dia preenchido com ícone de 'check' */
