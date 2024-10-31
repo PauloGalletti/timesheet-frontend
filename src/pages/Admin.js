@@ -77,6 +77,7 @@ const Admin = () => {
     <div className="admin-container">
       <div className="admin-header">
         <h1>Painel de Administração</h1>
+        <button onClick={() => navigate("/dashboard")} className="btn btn-secondary back-button">Voltar</button>
         <button onClick={handleLogout} className="btn btn-danger">
           Logout
         </button>

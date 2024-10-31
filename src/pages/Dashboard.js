@@ -23,7 +23,6 @@ const Dashboard = () => {
   const [filledDays, setFilledDays] = useState({});
   const navigate = useNavigate();
 
-  // Carrega a lista de usuários, clientes e projetos
   useEffect(() => {
     if (authService.isAdmin()) {
       api.get("/users/")
@@ -38,10 +37,9 @@ const Dashboard = () => {
       .then(response => setProjects(response.data))
       .catch(error => console.error("Erro ao carregar projetos:", error));
 
-    fetchFilledDays(); // Carrega os dias preenchidos para o usuário logado ou o selecionado
+    fetchFilledDays();
   }, []);
 
-  // Carrega os dias preenchidos para um usuário específico (ou o logado)
   const fetchFilledDays = (userId = null) => {
     const id = userId || parseInt(authService.getUserId(), 10);
     api.get(`/timesheet/?user=${id}`)
@@ -57,7 +55,6 @@ const Dashboard = () => {
       .catch(error => console.error("Erro ao carregar os dias preenchidos:", error));
   };
 
-  // Função para carregar as horas do dia clicado no calendário
   const handleDayClick = (day) => {
     setSelectedDay(day);
     if (filledDays[day]) {
@@ -82,7 +79,6 @@ const Dashboard = () => {
     }
   };
 
-  // Função para salvar os horários no backend
   const handleSave = () => {
     const formattedDate = dayjs(selectedDay).format('YYYY-MM-DD');
     const userId = selectedUser ? selectedUser.id : parseInt(authService.getUserId(), 10);
@@ -136,10 +132,18 @@ const Dashboard = () => {
       });
   };
 
+  const handleUserSelection = () => {
+    if (selectedUser) {
+      fetchFilledDays(selectedUser.id);
+    } else {
+      alert("Por favor, selecione um funcionário.");
+    }
+  };
+
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
-        <h1>Dashboard de Administração</h1>
+        <h1>Bem Vindo! -Variavel pendente ou não-</h1>
         <button onClick={() => {
           authService.logout();
           navigate("/login");
@@ -149,75 +153,84 @@ const Dashboard = () => {
       {authService.isAdmin() && (
         <div className="admin-tools">
           <button onClick={() => navigate('/admin')} className="btn btn-primary">Acessar Administração</button>
+          <button onClick={() => navigate('/admin2')} className="btn btn-secondary">Registrar Funcionário</button>
           <h2>Gerenciar Usuários</h2>
-          <ul className="user-list">
-            {users.map(user => (
-              <li key={user.id} className="user-item">
-                <span>{user.username}</span>
-                <button className="btn btn-secondary" onClick={() => setSelectedUser(user)}>Analisar Horas</button>
-              </li>
-            ))}
-          </ul>
+          <div className="form-group">
+            <label>Selecionar Funcionário:</label>
+            <select
+              className="input-select"
+              value={selectedUser ? selectedUser.id : ""}
+              onChange={(e) => {
+                const userId = parseInt(e.target.value, 10);
+                const user = users.find(u => u.id === userId);
+                setSelectedUser(user || null);
+              }}
+            >
+              <option value="">Selecione um funcionário</option>
+              {users.map(user => (
+                <option key={user.id} value={user.id}>{user.username}</option>
+              ))}
+            </select>
+          </div>
+          <button onClick={handleUserSelection} className="btn btn-secondary">Ver Planilha</button>
         </div>
       )}
 
-      {/* Exibe o calendário para o usuário logado ou o selecionado */}
       <Calendar onDayClick={handleDayClick} filledDays={filledDays} />
 
-      {/* Formulário de horários para o dia selecionado */}
       {selectedDay && (
         <div className="time-form">
           <h3>Horários para o dia {selectedDay}</h3>
-          <label>
-            Cliente:
-            <select value={client || ""} onChange={(e) => {
+          <div className="form-group">
+            <label>Cliente:</label>
+            <select className="input-select" value={client || ""} onChange={(e) => {
               const selectedClient = parseInt(e.target.value, 10);
               setClient(selectedClient);
-              setProject(null); // Resetar o projeto ao mudar de cliente
+              setProject(null);
             }}>
               <option value="">Selecione um cliente</option>
               {clients.map(client => (
                 <option key={client.id} value={client.id}>{client.name}</option>
               ))}
             </select>
-          </label>
-          <label>
-            Projeto:
-            <select value={project || ""} onChange={(e) => setProject(parseInt(e.target.value, 10))}>
+          </div>
+          <div className="form-group">
+            <label>Projeto:</label>
+            <select className="input-select" value={project || ""} onChange={(e) => setProject(parseInt(e.target.value, 10))}>
               <option value="">Selecione um projeto</option>
               {projects.filter(proj => proj.client === client).map(proj => (
                 <option key={proj.id} value={proj.id}>{proj.name}</option>
               ))}
             </select>
-          </label>
-          <label>
-            Atendimento:
-            <select value={atendimento} onChange={(e) => setAtendimento(e.target.value)}>
+          </div>
+          <div className="form-group">
+            <label>Atendimento:</label>
+            <select className="input-select" value={atendimento} onChange={(e) => setAtendimento(e.target.value)}>
               <option value="Sustentação">Sustentação</option>
               <option value="Projetos">Projetos</option>
               <option value="Atividades Internas">Atividades Internas</option>
             </select>
-          </label>
-          <label>
-            Detalhes:
-            <textarea value={detalhes} onChange={(e) => setDetalhes(e.target.value)} />
-          </label>
-          <label>
-            Observações:
-            <textarea value={obs} onChange={(e) => setObs(e.target.value)} />
-          </label>
-          <label>
-            Horário de Entrada:
-            <input type="time" value={entrada} onChange={(e) => setEntrada(e.target.value)} />
-          </label>
-          <label>
-            Intervalo (mínimo de 1h):
-            <input type="time" value={intervalo} onChange={(e) => setIntervalo(e.target.value)} />
-          </label>
-          <label>
-            Horário de Saída:
-            <input type="time" value={saida} onChange={(e) => setSaida(e.target.value)} />
-          </label>
+          </div>
+          <div className="form-group">
+            <label>Detalhes:</label>
+            <textarea className="input-textarea" value={detalhes} onChange={(e) => setDetalhes(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label>Observações:</label>
+            <textarea className="input-textarea" value={obs} onChange={(e) => setObs(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label>Horário de Entrada:</label>
+            <input className="input-time" type="time" value={entrada} onChange={(e) => setEntrada(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label>Intervalo (mínimo de 1h):</label>
+            <input className="input-time" type="time" value={intervalo} onChange={(e) => setIntervalo(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label>Horário de Saída:</label>
+            <input className="input-time" type="time" value={saida} onChange={(e) => setSaida(e.target.value)} />
+          </div>
           <button onClick={handleSave} className="btn btn-success">Salvar Horários</button>
         </div>
       )}
