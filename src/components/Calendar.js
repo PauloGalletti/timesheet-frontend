@@ -31,9 +31,10 @@ const Calendar = ({ onDayClick, filledDays }) => {
     // Dias do mês
     for (let day = 1; day <= daysInMonth; day++) {
       const fullDate = currentMonth.date(day).format('YYYY-MM-DD');
+      const dayOfWeek = currentMonth.date(day).day(); // Obtendo o dia da semana (0 para Domingo, 6 para Sábado)
 
       let dayStatus = '';
-      if (fullDate < today) {
+      if (fullDate < today && dayOfWeek !== 0 && dayOfWeek !== 6) { // Verifica se não é sábado ou domingo
         dayStatus = filledDays[fullDate] ? '✔️' : '❌';
       }
 
