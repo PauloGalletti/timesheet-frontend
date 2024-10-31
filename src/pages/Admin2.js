@@ -16,25 +16,26 @@ const Admin2 = () => {
     e.preventDefault();
 
     const newEmployee = {
-        username,
-        email,
-        name,
-        password,
-        role,
-        is_admin: isAdmin,
+      username,
+      email,
+      name,
+      password,
+      role,
+      is_admin: isAdmin,
     };
 
     api.post("/users/", newEmployee)
-        .then(response => {
-            console.log("Funcionário registrado com sucesso!", response.data);
-            alert("Funcionário registrado com sucesso!");
-            navigate("/dashboard");
-        })
-        .catch(error => {
-            console.error("Erro ao registrar funcionário:", error.response ? error.response.data : error.message);
-            alert(`Erro ao registrar funcionário: ${JSON.stringify(error.response.data)}`);
-        });
-    };
+      .then(response => {
+        console.log("Funcionário registrado com sucesso!", response.data);
+        alert("Funcionário registrado com sucesso!");
+        navigate("/dashboard");
+      })
+      .catch(error => {
+        console.error("Erro ao registrar funcionário:", error.response ? error.response.data : error.message);
+        alert(`Erro ao registrar funcionário: ${JSON.stringify(error.response.data)}`);
+      });
+  };
+
   return (
     <div className="admin2-container">
       <h1>Registrar Funcionário</h1>
@@ -42,23 +43,52 @@ const Admin2 = () => {
       <form onSubmit={handleSubmit} className="admin2-form">
         <div className="form-group">
           <label>Usuário:</label>
-          <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required />
+          <input
+            type="text"
+            className="admin-input"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
         </div>
         <div className="form-group">
           <label>Email:</label>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <input
+            type="email"
+            className="admin-input"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
         </div>
         <div className="form-group">
           <label>Nome:</label>
-          <input type="text" value={name} onChange={(e) => setName(e.target.value)} required />
+          <input
+            type="text"
+            className="admin-input"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
         </div>
         <div className="form-group">
           <label>Senha:</label>
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <input
+            type="password"
+            className="admin-input"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
         </div>
         <div className="form-group">
           <label>Cargo:</label>
-          <select value={role} onChange={(e) => setRole(e.target.value)} required>
+          <select
+            className="admin-select"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            required
+          >
             <option value="Estágio">Estágio</option>
             <option value="1">Nível 1</option>
             <option value="2">Nível 2</option>
@@ -67,7 +97,11 @@ const Admin2 = () => {
         </div>
         <div className="form-group">
           <label>Administrador:</label>
-          <input type="checkbox" checked={isAdmin} onChange={(e) => setIsAdmin(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={isAdmin}
+            onChange={(e) => setIsAdmin(e.target.checked)}
+          />
         </div>
         <button type="submit" className="btn btn-primary">Registrar</button>
       </form>

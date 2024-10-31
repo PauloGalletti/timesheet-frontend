@@ -29,11 +29,11 @@
     display: block;
   }
   
-  input[type="text"],
-  input[type="email"],
-  input[type="password"],
-  select {
-    width: 100%;
+  .admin-input[type="text"],
+  .admin-input[type="email"],
+  .admin-input[type="password"],
+  .admin-select {
+    width: 90%;
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 5px;
