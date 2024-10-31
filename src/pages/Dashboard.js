@@ -140,10 +140,15 @@ const Dashboard = () => {
     }
   };
 
+  const handleReturnToMyTimesheet = () => {
+    setSelectedUser(null);
+    fetchFilledDays(); // Carrega os dias do usuário logado
+  };
+
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
-        <h1>Bem Vindo! -Variavel pendente ou não-</h1>
+        <h1>Bem Vindo! {selectedUser ? `- ${selectedUser.username}` : "- Seu painel"}</h1>
         <button onClick={() => {
           authService.logout();
           navigate("/login");
@@ -176,11 +181,21 @@ const Dashboard = () => {
         </div>
       )}
 
+      {/* Botão para voltar ao painel do próprio usuário */}
+      {selectedUser && (
+        <div className="back-to-dashboard">
+          <button onClick={handleReturnToMyTimesheet} className="btn btn-secondary">
+            Voltar ao meu painel
+          </button>
+        </div>
+      )}
+
       <Calendar onDayClick={handleDayClick} filledDays={filledDays} />
 
       {selectedDay && (
         <div className="time-form">
           <h3>Horários para o dia {selectedDay}</h3>
+          {/* Formulário para preenchimento dos horários */}
           <div className="form-group">
             <label>Cliente:</label>
             <select className="input-select" value={client || ""} onChange={(e) => {
@@ -203,6 +218,7 @@ const Dashboard = () => {
               ))}
             </select>
           </div>
+          {/* Demais campos do formulário */}
           <div className="form-group">
             <label>Atendimento:</label>
             <select className="input-select" value={atendimento} onChange={(e) => setAtendimento(e.target.value)}>
